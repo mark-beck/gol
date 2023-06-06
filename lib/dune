@@ -1,2 +1,3 @@
 (library
- (name gol))
+ (name gol)
+ (libraries raygui))
