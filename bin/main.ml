@@ -198,18 +198,27 @@ let rec loop gamestate =
         else gamestate
       in
 
-      (* print fps every second *)
+      (* print info every second *)
       let gamestate =
-        if gamestate.last_info +. 2. < current_time then (
-          print_string "current fps: ";
+        if gamestate.last_info +. 1. < current_time then (
+          print_string "fps: ";
           print_endline @@ string_of_int @@ get_fps ();
-          print_string "current frametime: ";
+          print_string "frametime: ";
           print_endline @@ string_of_float @@ get_frame_time ();
+          print_string "width: ";
+          print_endline @@ string_of_int @@ get_screen_width ();
+          print_string "height: ";
+          print_endline @@ string_of_int @@ get_screen_height ();
+          print_string "cell size: ";
+          print_endline @@ string_of_int @@ single_cell_len;
           { gamestate with last_info = current_time })
         else gamestate
       in
 
       begin_drawing ();
+
+      draw_fps (screen_width - 75) 0;
+
       clear_background Color.raywhite;
       gamestate.cells
       |> Array.iter (fun row -> row |> Array.iter (fun cell -> Cell.draw cell));
