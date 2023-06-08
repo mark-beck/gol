@@ -13,25 +13,6 @@ let vec2d_in_rect vec rect =
   && vecy >= recty
   && vecy <= recty +. recth
 
-let get_2d xy arrays =
-  let x, y = xy in
-  try
-    let row = Array.get arrays x in
-    Some (Array.get row y)
-  with Invalid_argument _ -> None
-
-let nb_count cells x y =
-  (*List of positions around*)
-  let poses =
-    [ (-1, -1); (-1, 0); (-1, 1); (0, -1); (0, 1); (1, -1); (1, 0); (1, 1) ]
-  in
-  poses
-  |> List.map (fun (i, j) -> (x + i, y + j))
-  |> List.map (fun xy -> get_2d xy cells)
-  |> List.map (fun o -> o |> Option.map (fun e -> Cell.state e))
-  |> List.map (function Some 1 -> 1 | _ -> 0)
-  |> List.fold_left ( + ) 0
-
 let run_step (cells : Cell.t array array) =
   cells
   |> Array.mapi (fun i row ->
@@ -39,8 +20,10 @@ let run_step (cells : Cell.t array array) =
          |> Array.mapi (fun j cell ->
                 let state =
                   match Cell.state cell with
-                  | 0 -> ( match nb_count cells i j with 3 -> 1 | _ -> 0)
-                  | 1 -> ( match nb_count cells i j with 2 | 3 -> 1 | _ -> 0)
+                  | 0 -> (
+                      match Board.count_nbs cells i j with 3 -> 1 | _ -> 0)
+                  | 1 -> (
+                      match Board.count_nbs cells i j with 2 | 3 -> 1 | _ -> 0)
                   | a -> a
                 in
                 { cell with state }))
@@ -53,7 +36,7 @@ let setup () =
   Raylib.set_target_fps 60
 
 type gamestate = {
-  cells : Cell.t array array;
+  board : Board.t;
   last_gamestep : float;
   paused : bool;
   step_intervall : float;
@@ -66,7 +49,7 @@ type gamestate = {
 
 let gamestate =
   {
-    cells = Array.make 100 (Array.make 100 (Cell.empty ()));
+    board = Board.create_clear 100 100;
     last_gamestep = 0.0;
     paused = true;
     step_intervall = 0.2;
@@ -77,14 +60,6 @@ let gamestate =
     cols = 100;
   }
 
-let init_random xs ys =
-  Array.make xs (Array.make ys (Cell.empty ()))
-  |> Array.map (fun row ->
-         row
-         |> Array.map (fun cell ->
-                if Random.int 100 < 20 then { cell with Cell.state = 1 }
-                else cell))
-
 let rec loop gamestate =
   match Raylib.window_should_close () with
   | true -> Raylib.close_window ()
@@ -93,11 +68,8 @@ let rec loop gamestate =
       (* check reset *)
       let gamestate =
         if gamestate.reset then
-          let cells =
-            Array.make gamestate.cols
-              (Array.make gamestate.rows (Cell.empty ()))
-          in
-          { gamestate with cells; reset = false }
+          let board = Board.create_clear gamestate.rows gamestate.cols in
+          { gamestate with board; reset = false }
         else gamestate
       in
 
@@ -105,7 +77,7 @@ let rec loop gamestate =
         if gamestate.random then
           {
             gamestate with
-            cells = init_random gamestate.cols gamestate.rows;
+            board = Board.create_random gamestate.cols gamestate.rows;
             random = false;
           }
         else gamestate
@@ -116,15 +88,15 @@ let rec loop gamestate =
       let screen_width = get_screen_width () in
 
       (* keep 150 px reserved for controls *)
-      let cells_count_x = Array.length gamestate.cells in
-      let cells_count_y = Array.get gamestate.cells 0 |> Array.length in
+      let cells_count_x = Board.rows gamestate.board in
+      let cells_count_y = Board.cols gamestate.board in
       let cell_len_with_width = screen_width / cells_count_x in
       let cell_len_with_height = (screen_height - 150) / cells_count_y in
       let single_cell_len = Int.min cell_len_with_width cell_len_with_height in
 
       let gamestate =
-        let cells =
-          gamestate.cells
+        let board =
+          gamestate.board
           |> Array.mapi (fun i row ->
                  row
                  |> Array.mapi (fun j cell ->
@@ -135,7 +107,7 @@ let rec loop gamestate =
                           Cell.width = single_cell_len;
                         }))
         in
-        { gamestate with cells }
+        { gamestate with board }
       in
 
       (* compute controls positions *)
@@ -153,8 +125,8 @@ let rec loop gamestate =
 
       (* check if mouse is over cell and update the cell*)
       let gamestate =
-        let cells =
-          gamestate.cells
+        let board =
+          gamestate.board
           |> Array.map (fun row ->
                  row
                  |> Array.map (fun cell ->
@@ -166,7 +138,7 @@ let rec loop gamestate =
                           else cell
                         else cell))
         in
-        { gamestate with cells }
+        { gamestate with board }
       in
 
       (* check if pause state should be changed *)
@@ -186,7 +158,7 @@ let rec loop gamestate =
         then
           {
             gamestate with
-            cells = run_step gamestate.cells;
+            board = run_step gamestate.board;
             last_gamestep = current_time;
           }
         else gamestate
@@ -214,7 +186,7 @@ let rec loop gamestate =
       draw_fps (screen_width - 75) 0;
 
       clear_background Color.raywhite;
-      gamestate.cells
+      gamestate.board
       |> Array.iter (fun row -> row |> Array.iter (fun cell -> Cell.draw cell));
 
       (* render controls *)
