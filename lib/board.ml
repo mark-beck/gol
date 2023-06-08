@@ -30,3 +30,16 @@ let count_nbs cells x y =
   |> List.map (fun o -> o |> Option.map (fun e -> Cell.state e))
   |> List.map (function Some 1 -> 1 | _ -> 0)
   |> List.fold_left ( + ) 0
+
+let run_step cells =
+  cells
+  |> Array.mapi (fun i row ->
+         row
+         |> Array.mapi (fun j cell ->
+                let state =
+                  match Cell.state cell with
+                  | 0 -> ( match count_nbs cells i j with 3 -> 1 | _ -> 0)
+                  | 1 -> ( match count_nbs cells i j with 2 | 3 -> 1 | _ -> 0)
+                  | a -> a
+                in
+                { cell with state }))
