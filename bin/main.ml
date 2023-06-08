@@ -37,18 +37,16 @@ let run_step (cells : Cell.t array array) =
   |> Array.mapi (fun i row ->
          row
          |> Array.mapi (fun j cell ->
-                {
-                  cell with
-                  Cell.state =
-                    (match Cell.state cell with
-                    | 0 -> ( match nb_count cells i j with 3 -> 1 | _ -> 0)
-                    | 1 -> (
-                        match nb_count cells i j with 2 | 3 -> 1 | _ -> 0)
-                    | a -> a);
-                }))
+                let state =
+                  match Cell.state cell with
+                  | 0 -> ( match nb_count cells i j with 3 -> 1 | _ -> 0)
+                  | 1 -> ( match nb_count cells i j with 2 | 3 -> 1 | _ -> 0)
+                  | a -> a
+                in
+                { cell with state }))
 
-let width = 100
-let height = 100
+let width = 680
+let height = 1000
 
 let setup () =
   Raylib.init_window width height "raylib [core] example - mouse input";
@@ -95,13 +93,11 @@ let rec loop gamestate =
       (* check reset *)
       let gamestate =
         if gamestate.reset then
-          {
-            gamestate with
-            cells =
-              Array.make gamestate.cols
-                (Array.make gamestate.rows (Cell.empty ()));
-            reset = false;
-          }
+          let cells =
+            Array.make gamestate.cols
+              (Array.make gamestate.rows (Cell.empty ()))
+          in
+          { gamestate with cells; reset = false }
         else gamestate
       in
 
@@ -127,20 +123,19 @@ let rec loop gamestate =
       let single_cell_len = Int.min cell_len_with_width cell_len_with_height in
 
       let gamestate =
-        {
-          gamestate with
-          cells =
-            gamestate.cells
-            |> Array.mapi (fun i row ->
-                   row
-                   |> Array.mapi (fun j cell ->
-                          {
-                            cell with
-                            Cell.x = i * single_cell_len;
-                            Cell.y = (j * single_cell_len) + 150;
-                            Cell.width = single_cell_len;
-                          }));
-        }
+        let cells =
+          gamestate.cells
+          |> Array.mapi (fun i row ->
+                 row
+                 |> Array.mapi (fun j cell ->
+                        {
+                          cell with
+                          Cell.x = i * single_cell_len;
+                          Cell.y = (j * single_cell_len) + 150;
+                          Cell.width = single_cell_len;
+                        }))
+        in
+        { gamestate with cells }
       in
 
       (* compute controls positions *)
@@ -158,21 +153,20 @@ let rec loop gamestate =
 
       (* check if mouse is over cell and update the cell*)
       let gamestate =
-        {
-          gamestate with
-          cells =
-            gamestate.cells
-            |> Array.map (fun row ->
-                   row
-                   |> Array.map (fun cell ->
-                          if Cell.is_overlapping cell mouse_pos then
-                            if is_mouse_button_down MouseButton.Left then
-                              { cell with Cell.state = 1 }
-                            else if is_mouse_button_down MouseButton.Right then
-                              { cell with Cell.state = 0 }
-                            else cell
-                          else cell));
-        }
+        let cells =
+          gamestate.cells
+          |> Array.map (fun row ->
+                 row
+                 |> Array.map (fun cell ->
+                        if Cell.is_overlapping cell mouse_pos then
+                          if is_mouse_button_down MouseButton.Left then
+                            { cell with Cell.state = 1 }
+                          else if is_mouse_button_down MouseButton.Right then
+                            { cell with Cell.state = 0 }
+                          else cell
+                        else cell))
+        in
+        { gamestate with cells }
       in
 
       (* check if pause state should be changed *)
