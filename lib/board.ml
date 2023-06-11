@@ -8,8 +8,7 @@ let create_clear x y = Array.make x @@ Array.make y @@ Cell.empty ()
 
 let create_random ?(prob = 20) x y =
   create_clear x y
-  |> map2d @@ fun cell ->
-     if Random.int 100 < prob then { cell with Cell.state = 1 } else cell
+  |> map2d @@ fun cell -> if Random.int 100 < prob then Cell.make 1 else cell
 
 let count_nbs cells state x y =
   (*List of positions around*)

@@ -1,5 +1,5 @@
-type t = { state : int; x : int; y : int; width : int }
+type t
 
+val make : int -> t
 val state : t -> int
 val empty : unit -> t
-val is_overlapping : t -> Raylib.Vector2.t -> bool

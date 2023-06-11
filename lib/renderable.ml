@@ -48,7 +48,7 @@ class boardObj x_pos y_pos w h board' rule =
              |> Array.iteri (fun j cell_obj ->
                     let cell = Option.get @@ Helpers.get_2d (i, j) board in
                     let color =
-                      Rule.color rule cell.Cell.state |> Helpers.parse_color
+                      Rule.color rule (Cell.state cell) |> Helpers.parse_color
                     in
                     cell_obj#render color))
 
@@ -66,10 +66,8 @@ class boardObj x_pos y_pos w h board' rule =
            |> Array.mapi @@ fun j cell ->
               let cellObj = Option.get @@ Helpers.get_2d (i, j) cells_pos in
               if cellObj#is_overlapping mouse_pos then
-                if is_mouse_button_down MouseButton.Left then
-                  { cell with Cell.state = 1 }
-                else if is_mouse_button_down MouseButton.Right then
-                  { cell with Cell.state = 0 }
+                if is_mouse_button_down MouseButton.Left then Cell.make 1
+                else if is_mouse_button_down MouseButton.Right then Cell.make 0
                 else cell
               else cell)
 

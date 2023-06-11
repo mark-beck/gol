@@ -35,7 +35,7 @@ let run_step (rule : t) (cells : Board.t) =
                   |> List.map (fun state -> Board.count_nbs cells state i j)
                 in
                 let state = apply_rule rule nbs (Cell.state cell) in
-                { cell with state }))
+                Cell.make state))
 
 let color rule state = Array.get rule.colors state
 
