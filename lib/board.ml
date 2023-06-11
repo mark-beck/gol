@@ -13,10 +13,11 @@ let create_random ?(prob = 20) x y =
 let count_nbs cells state x y =
   (*List of positions around*)
   [ (-1, -1); (-1, 0); (-1, 1); (0, -1); (0, 1); (1, -1); (1, 0); (1, 1) ]
-  |> List.map (fun (i, j) -> (x + i, y + j))
-  |> List.map (fun xy -> Helpers.get_2d xy cells)
-  |> List.map (function Some v when v = state -> 1 | _ -> 0)
-  |> List.fold_left ( + ) 0
+  |> List.to_seq
+  |> Seq.map (fun (i, j) -> (x + i, y + j))
+  |> Seq.map (fun xy -> Helpers.get_2d xy cells)
+  |> Seq.map (function Some v when v = state -> 1 | _ -> 0)
+  |> Seq.fold_left ( + ) 0
 
 let get = get_2d
 let map = map2d

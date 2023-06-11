@@ -16,13 +16,15 @@ let compare_with_stars s1 s2 =
   Seq.zip s1 s2
   |> Seq.for_all @@ fun (c1, c2) -> c1 = c2 || c1 = '*' || c2 = '*'
 
-(* find the first wildcard rule that matches the given state, or None if none matches *)
+(* find the first wildcard rule that matches the given state,
+   or None if none matches *)
 let find_most_fitting rule nbs =
   rule
   |> Smap.find_first_opt (fun key -> compare_with_stars key nbs)
   |> Option.map snd
 
-(* apply the ruleset to the given state and a list of moores neighborhood states *)
+(* apply the ruleset to the given state and
+   a list of moores neighborhood states *)
 let apply_rule (rule : t) (nbs : int list) (state : int) =
   let nbs_str = nbs |> List.map Int.to_string |> List.fold_left String.cat "" in
   let rule_map = Array.get rule.rule_map state in

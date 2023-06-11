@@ -1,4 +1,4 @@
 (executable
  (public_name gol)
  (name main)
- (libraries gol raygui))
+ (libraries gol raylib raygui))

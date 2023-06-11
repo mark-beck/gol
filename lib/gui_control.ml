@@ -1,8 +1,8 @@
 (* extract the colors from a rule and return them as a string *)
 let extract_colors rule =
   let res =
-    List.init (Rule.states rule) (fun i -> Rule.color rule i)
-    |> List.fold_left (fun acc e -> acc ^ "\n" ^ e) ""
+    Seq.init (Rule.states rule) (fun i -> Rule.color rule i)
+    |> Seq.fold_left (fun acc e -> acc ^ "\n" ^ e) ""
     |> String.trim
   in
   Printf.printf "colors: %s\n" res;
@@ -20,7 +20,7 @@ class colorSelector rect rule =
         Raygui.(dropdown_box rect colors selected_state is_open)
       in
       selected_state <- selected;
-      match op with true -> is_open <- not is_open | false -> ()
+      if op then is_open <- not is_open
 
     method recompute_dimensions _ _ = ()
     method check_hover _state _mouse_pos = ()
@@ -36,7 +36,7 @@ class virtual spinner rect name ~min ~max =
     method render =
       let value', op = Raygui.(spinner rect name value ~min ~max is_selected) in
       value <- value';
-      match op with true -> is_selected <- not is_selected | false -> ()
+      if op then is_selected <- not is_selected
 
     method recompute_dimensions _ _ = ()
     method check_hover _state _mouse_pos = ()
