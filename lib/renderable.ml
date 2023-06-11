@@ -43,14 +43,14 @@ class boardObj x_pos y_pos w h board' rule =
 
     method render =
       cells_pos
-      |> Array.iteri (fun i row ->
-             row
-             |> Array.iteri (fun j cell_obj ->
-                    let cell = Option.get @@ Helpers.get_2d (i, j) board in
-                    let color =
-                      Rule.color rule (Cell.state cell) |> Helpers.parse_color
-                    in
-                    cell_obj#render color))
+      |> Array.iteri @@ fun i row ->
+         row
+         |> Array.iteri @@ fun j cell_obj ->
+            let cell = Option.get @@ Helpers.get_2d (i, j) board in
+            let color =
+              Rule.color rule (Cell.state cell) |> Helpers.parse_color
+            in
+            cell_obj#render color
 
     method recompute_dimensions w h =
       cells_pos <-

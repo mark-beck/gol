@@ -4,7 +4,7 @@ type t = Cell.t array array
 
 let rows board = Array.length board
 let cols board = Array.get board 0 |> Array.length
-let create_clear x y = Array.make x @@ Array.make y @@ Cell.empty ()
+let create_clear x y = Array.make x @@ Array.make y @@ Cell.make 0
 
 let create_random ?(prob = 20) x y =
   create_clear x y

@@ -10,7 +10,8 @@ type t = {
 let compare_with_stars s1 s2 =
   let s1 = String.to_seq s1 in
   let s2 = String.to_seq s2 in
-  Seq.zip s1 s2 |> Seq.for_all (fun (c1, c2) -> c1 = c2 || c1 = '*' || c2 = '*')
+  Seq.zip s1 s2
+  |> Seq.for_all @@ fun (c1, c2) -> c1 = c2 || c1 = '*' || c2 = '*'
 
 let find_most_fitting rule nbs =
   rule
@@ -26,16 +27,16 @@ let apply_rule (rule : t) (nbs : int list) (state : int) =
 
 let run_step (rule : t) (cells : Board.t) =
   cells
-  |> Array.mapi (fun i row ->
-         row
-         |> Array.mapi (fun j cell ->
-                let states_number = Array.length rule.default in
-                let nbs =
-                  List.init states_number id
-                  |> List.map (fun state -> Board.count_nbs cells state i j)
-                in
-                let state = apply_rule rule nbs (Cell.state cell) in
-                Cell.make state))
+  |> Array.mapi @@ fun i row ->
+     row
+     |> Array.mapi @@ fun j cell ->
+        let states_number = Array.length rule.default in
+        let nbs =
+          List.init states_number id
+          |> List.map @@ fun state -> Board.count_nbs cells state i j
+        in
+        let state = apply_rule rule nbs (Cell.state cell) in
+        Cell.make state
 
 let color rule state = Array.get rule.colors state
 
