@@ -9,18 +9,62 @@ let init_game_objects () =
   let to_baseObj ob = (ob :> Gui.baseObj) in
   let rule = Rule.bb in
   let board_obj =
-    to_baseObj @@ new Gui.boardObj 0 150 400 400 (Board.create_clear 100 100) rule
+    to_baseObj
+    @@ new Gui.boardObj 0 150 400 400 (Board.create_clear 100 100) rule
   in
 
-  let row_spinner = to_baseObj @@ new Gui_control.rowSpinner (Rectangle.create 25.0 100. 100.0 20.0) "rows" in
-  let col_spinner = to_baseObj @@ new Gui_control.colSpinner (Rectangle.create 200.0 100. 100.0 20.0) "cols" in
+  (* set up control elements *)
+  let paused_checkbox =
+    to_baseObj
+    @@ new Gui_control.pausedCheckbox
+         (Rectangle.create 50.0 25.0 15.0 15.0)
+         "paused"
+  in
+  let speed_slider =
+    to_baseObj
+    @@ new Gui_control.speedSlider
+         (Rectangle.create 50.0 50. 200.0 20.0)
+         ~min:0. ~max:1. ~default:0.2
+  in
+  let reset_button =
+    to_baseObj
+    @@ new Gui_control.resetButton (Rectangle.create 50.0 75. 50.0 20.0) "reset"
+  in
+  let random_button =
+    to_baseObj
+    @@ new Gui_control.randomButton
+         (Rectangle.create 125.0 75. 50.0 20.0)
+         "random"
+  in
+  let row_spinner =
+    to_baseObj
+    @@ new Gui_control.rowSpinner
+         (Rectangle.create 50.0 100. 100.0 20.0)
+         "rows" ~min:0 ~max:200
+  in
+  let col_spinner =
+    to_baseObj
+    @@ new Gui_control.colSpinner
+         (Rectangle.create 225.0 100. 100.0 20.0)
+         "cols" ~min:0 ~max:200
+  in
 
   let selector =
-    to_baseObj @@ new Gui_control.colorSelector
-      (Raylib.Rectangle.create 250. 25. 100. 20.)
-      rule
+    to_baseObj
+    @@ new Gui_control.colorSelector
+         (Raylib.Rectangle.create 250. 25. 100. 20.)
+         rule
   in
-  [ board_obj ; row_spinner ; col_spinner ; selector ]
+  [
+    board_obj;
+    row_spinner;
+    col_spinner;
+    paused_checkbox;
+    speed_slider;
+    reset_button;
+    random_button;
+    selector;
+  ]
 
 let setup () =
   Raylib.init_window width height "gol";
@@ -44,19 +88,12 @@ let rec loop gamestate =
       |> List.iter (fun obj ->
              obj#recompute_dimensions screen_width screen_height);
 
-      (* compute controls positions *)
-      let paused_checkbox_pos = Rectangle.create 25.0 25.0 15.0 15.0 in
-      let step_spinner_pos = Rectangle.create 25.0 50. 200.0 20.0 in
-      let reset_button_pos = Rectangle.create 25.0 75. 50.0 20.0 in
-      let random_button_pos = Rectangle.create 100.0 75. 50.0 20.0 in
-
       (* check if mouse is over control element *)
       let mouse_pos = get_mouse_position () in
 
       gameObjs |> List.iter (fun obj -> obj#check_hover gamestate mouse_pos);
 
       (* check if pause state should be changed *)
-      let current_time = get_time () in
       let gamestate =
         if is_key_pressed Key.Space then (
           print_endline "game paused/unpaused";
@@ -70,6 +107,7 @@ let rec loop gamestate =
       in
 
       (* print info every second *)
+      let current_time = get_time () in
       let gamestate =
         if gamestate.last_info +. 10. < current_time then (
           print_string "fps: ";
@@ -92,24 +130,6 @@ let rec loop gamestate =
 
       clear_background Color.raywhite;
       gameObjs |> List.iter (fun obj -> obj#render);
-
-      (* render controls *)
-      Raygui.enable ();
-      let paused =
-        Raygui.(check_box paused_checkbox_pos "PAUSED" gamestate.paused)
-      in
-      let step_intervall =
-        Raygui.(
-          slider step_spinner_pos "0" "1" gamestate.step_intervall ~min:0.
-            ~max:1.)
-      in
-      let reset = Raygui.(button reset_button_pos "Reset") in
-      let random = Raygui.(button random_button_pos "Random") in
-      
-      let gamestate =
-        { gamestate with paused; step_intervall; reset; random }
-      in
-
       end_drawing ();
       loop gamestate
 

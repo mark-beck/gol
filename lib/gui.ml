@@ -46,14 +46,14 @@ class boardObj x_pos y_pos w h board' rule =
       |> Array.iteri @@ fun i row ->
          row
          |> Array.iteri @@ fun j cell_obj ->
-          try
-            let cell = Option.get @@ Board.get (i, j) board in
-            let color = Rule.color rule cell |> Helpers.parse_color in
-            cell_obj#render color
-          with e ->
-            print_string "Error rendering cell: "; 
-            print_endline @@ Printexc.to_string e;
-            raise e
+            try
+              let cell = Option.get @@ Board.get (i, j) board in
+              let color = Rule.color rule cell |> Helpers.parse_color in
+              cell_obj#render color
+            with e ->
+              print_string "Error rendering cell: ";
+              print_endline @@ Printexc.to_string e;
+              raise e
 
     method recompute_dimensions w h =
       cells_pos <-
@@ -65,18 +65,18 @@ class boardObj x_pos y_pos w h board' rule =
       board <-
         (board
         |> Board.mapi @@ fun pos cell ->
-          try
-           let cellObj = Option.get @@ Helpers.get_2d pos cells_pos in
-           if cellObj#is_overlapping mouse_pos then
-             if is_mouse_button_down MouseButton.Left then
-               state.Gamestate.selected_color
-             else if is_mouse_button_down MouseButton.Right then 0
+           try
+             let cellObj = Option.get @@ Helpers.get_2d pos cells_pos in
+             if cellObj#is_overlapping mouse_pos then
+               if is_mouse_button_down MouseButton.Left then
+                 state.Gamestate.selected_color
+               else if is_mouse_button_down MouseButton.Right then 0
+               else cell
              else cell
-           else cell
-          with e ->
-            print_string "Error checking hover: "; 
-            print_endline @@ Printexc.to_string e;
-            raise e)
+           with e ->
+             print_string "Error checking hover: ";
+             print_endline @@ Printexc.to_string e;
+             raise e)
 
     method tick state =
       let open Gamestate in
@@ -84,7 +84,8 @@ class boardObj x_pos y_pos w h board' rule =
       let state =
         if state.reset then (
           board <- Board.create_clear state.rows state.cols;
-          cells_pos <- init_cell_pos x_pos y_pos w h (Board.rows board) (Board.cols board);
+          cells_pos <-
+            init_cell_pos x_pos y_pos w h (Board.rows board) (Board.cols board);
           { state with reset = false })
         else state
       in
