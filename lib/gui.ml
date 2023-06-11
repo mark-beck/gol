@@ -2,8 +2,8 @@ class virtual baseObj =
   object
     method virtual render : unit
     method virtual recompute_dimensions : int -> int -> unit
-    method virtual check_hover : Raylib.Vector2.t -> unit
-    method virtual tick : unit
+    method virtual check_hover : Gamestate.t -> Raylib.Vector2.t -> unit
+    method virtual tick : Gamestate.t -> Gamestate.t
   end
 
 class squareObj x_pos y_pos width =
@@ -46,28 +46,60 @@ class boardObj x_pos y_pos w h board' rule =
       |> Array.iteri @@ fun i row ->
          row
          |> Array.iteri @@ fun j cell_obj ->
+          try
             let cell = Option.get @@ Board.get (i, j) board in
             let color = Rule.color rule cell |> Helpers.parse_color in
             cell_obj#render color
+          with e ->
+            print_string "Error rendering cell: "; 
+            print_endline @@ Printexc.to_string e;
+            raise e
 
     method recompute_dimensions w h =
       cells_pos <-
         init_cell_pos x_pos y_pos w h (Board.rows board) (Board.cols board)
 
-    method check_hover mouse_pos =
+    method check_hover state mouse_pos =
       let open Raylib in
       (* check if mouse is over cell and update the cell*)
       board <-
         (board
         |> Board.mapi @@ fun pos cell ->
+          try
            let cellObj = Option.get @@ Helpers.get_2d pos cells_pos in
            if cellObj#is_overlapping mouse_pos then
-             if is_mouse_button_down MouseButton.Left then 1
+             if is_mouse_button_down MouseButton.Left then
+               state.Gamestate.selected_color
              else if is_mouse_button_down MouseButton.Right then 0
              else cell
-           else cell)
+           else cell
+          with e ->
+            print_string "Error checking hover: "; 
+            print_endline @@ Printexc.to_string e;
+            raise e)
 
-    method tick = board <- Rule.run_step rule board
+    method tick state =
+      let open Gamestate in
+      (* check if board should be reset *)
+      let state =
+        if state.reset then (
+          board <- Board.create_clear state.rows state.cols;
+          cells_pos <- init_cell_pos x_pos y_pos w h (Board.rows board) (Board.cols board);
+          { state with reset = false })
+        else state
+      in
+
+      (* check if its time for a gamestep *)
+      if
+        (not state.Gamestate.paused)
+        && Gamestate.(
+             state.tick_count > state.last_gamestep +. state.step_intervall)
+      then (
+        board <- Rule.run_step rule board;
+        { state with last_gamestep = state.tick_count })
+      else state
+
     method clear_board rows cols = board <- Board.create_clear rows cols
     method random_board rows cols = board <- Board.create_random rows cols
+    method rule = rule
   end

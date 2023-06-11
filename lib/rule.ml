@@ -7,6 +7,8 @@ type t = {
   colors : string array;
 }
 
+let states rule = rule.default |> Array.length
+
 let compare_with_stars s1 s2 =
   let s1 = String.to_seq s1 in
   let s2 = String.to_seq s2 in
