@@ -1,4 +1,4 @@
-class virtual gameObj =
+class virtual baseObj =
   object
     method virtual render : unit
     method virtual recompute_dimensions : int -> int -> unit
@@ -35,7 +35,7 @@ let init_cell_pos x y w h x_amount y_amount =
 
 class boardObj x_pos y_pos w h board' rule =
   object
-    inherit gameObj
+    inherit baseObj
     val mutable board = board'
 
     val mutable cells_pos =
@@ -46,10 +46,8 @@ class boardObj x_pos y_pos w h board' rule =
       |> Array.iteri @@ fun i row ->
          row
          |> Array.iteri @@ fun j cell_obj ->
-            let cell = Option.get @@ Helpers.get_2d (i, j) board in
-            let color =
-              Rule.color rule (Cell.state cell) |> Helpers.parse_color
-            in
+            let cell = Option.get @@ Board.get (i, j) board in
+            let color = Rule.color rule cell |> Helpers.parse_color in
             cell_obj#render color
 
     method recompute_dimensions w h =
@@ -61,15 +59,13 @@ class boardObj x_pos y_pos w h board' rule =
       (* check if mouse is over cell and update the cell*)
       board <-
         (board
-        |> Array.mapi @@ fun i row ->
-           row
-           |> Array.mapi @@ fun j cell ->
-              let cellObj = Option.get @@ Helpers.get_2d (i, j) cells_pos in
-              if cellObj#is_overlapping mouse_pos then
-                if is_mouse_button_down MouseButton.Left then Cell.make 1
-                else if is_mouse_button_down MouseButton.Right then Cell.make 0
-                else cell
-              else cell)
+        |> Board.mapi @@ fun pos cell ->
+           let cellObj = Option.get @@ Helpers.get_2d pos cells_pos in
+           if cellObj#is_overlapping mouse_pos then
+             if is_mouse_button_down MouseButton.Left then 1
+             else if is_mouse_button_down MouseButton.Right then 0
+             else cell
+           else cell)
 
     method tick = board <- Rule.run_step rule board
     method clear_board rows cols = board <- Board.create_clear rows cols

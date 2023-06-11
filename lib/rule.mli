@@ -1,6 +1,6 @@
 type t
 
-val run_step : t -> Board.t -> Cell.t array array
+val run_step : t -> Board.t -> Board.t
 val color : t -> int -> string
 val gol : t
 val seeds : t

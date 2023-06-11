@@ -25,18 +25,15 @@ let apply_rule (rule : t) (nbs : int list) (state : int) =
   |> oor (find_most_fitting rule_map nbs_str)
   |> Option.value ~default:(Array.get rule.default state)
 
-let run_step (rule : t) (cells : Board.t) =
-  cells
-  |> Array.mapi @@ fun i row ->
-     row
-     |> Array.mapi @@ fun j cell ->
-        let states_number = Array.length rule.default in
-        let nbs =
-          List.init states_number id
-          |> List.map @@ fun state -> Board.count_nbs cells state i j
-        in
-        let state = apply_rule rule nbs (Cell.state cell) in
-        Cell.make state
+let run_step (rule : t) (board : Board.t) =
+  board
+  |> Board.mapi @@ fun (i, j) cell ->
+     let states_number = Array.length rule.default in
+     let nbs =
+       List.init states_number id
+       |> List.map @@ fun state -> Board.count_nbs board state i j
+     in
+     apply_rule rule nbs cell
 
 let color rule state = Array.get rule.colors state
 

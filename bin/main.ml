@@ -32,7 +32,7 @@ let gamestate =
   }
 
 let boardObj =
-  new Renderable.boardObj 0 150 400 400 (Board.create_clear 100 100) Rule.bb
+  new Gui.boardObj 0 150 400 400 (Board.create_clear 100 100) Rule.bb
 
 let clear_board_ref rows cols = boardObj#clear_board rows cols
 let random_board_ref rows cols = boardObj#random_board rows cols
