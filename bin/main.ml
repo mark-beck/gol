@@ -1,17 +1,5 @@
 open Gol
-
-let vec2d_in_rect vec rect =
-  let open Raylib in
-  let vecx = Vector2.x vec in
-  let vecy = Vector2.y vec in
-  let rectx = Rectangle.x rect in
-  let recty = Rectangle.y rect in
-  let rectw = Rectangle.width rect in
-  let recth = Rectangle.height rect in
-  vecx >= rectx
-  && vecx <= rectx +. rectw
-  && vecy >= recty
-  && vecy <= recty +. recth
+open Gol.Helpers
 
 let width = 680
 let height = 1000
@@ -44,7 +32,7 @@ let gamestate =
   }
 
 let boardObj =
-  new Renderable.boardObj 0 150 400 400 (Board.create_clear 100 100)
+  new Renderable.boardObj 0 150 400 400 (Board.create_clear 100 100) Rule.bb
 
 let clear_board_ref rows cols = boardObj#clear_board rows cols
 let random_board_ref rows cols = boardObj#random_board rows cols

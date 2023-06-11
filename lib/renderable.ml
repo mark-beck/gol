@@ -33,7 +33,7 @@ let init_cell_pos x y w h x_amount y_amount =
         let y = y + (j * single_cell_len) in
         new squareObj x y single_cell_len
 
-class boardObj x_pos y_pos w h board' =
+class boardObj x_pos y_pos w h board' rule =
   object
     inherit gameObj
     val mutable board = board'
@@ -46,13 +46,9 @@ class boardObj x_pos y_pos w h board' =
       |> Array.iteri (fun i row ->
              row
              |> Array.iteri (fun j cell_obj ->
-                    let open Raylib in
-                    let cell = Option.get @@ Board.get_2d (i, j) board in
+                    let cell = Option.get @@ Helpers.get_2d (i, j) board in
                     let color =
-                      match cell.state with
-                      | 0 -> Color.gray
-                      | 1 -> Color.black
-                      | _ -> Color.red
+                      Rule.color rule cell.Cell.state |> Helpers.parse_color
                     in
                     cell_obj#render color))
 
@@ -68,7 +64,7 @@ class boardObj x_pos y_pos w h board' =
         |> Array.mapi @@ fun i row ->
            row
            |> Array.mapi @@ fun j cell ->
-              let cellObj = Option.get @@ Board.get_2d (i, j) cells_pos in
+              let cellObj = Option.get @@ Helpers.get_2d (i, j) cells_pos in
               if cellObj#is_overlapping mouse_pos then
                 if is_mouse_button_down MouseButton.Left then
                   { cell with Cell.state = 1 }
@@ -77,7 +73,7 @@ class boardObj x_pos y_pos w h board' =
                 else cell
               else cell)
 
-    method tick = board <- Board.run_step board
+    method tick = board <- Rule.run_step rule board
     method clear_board rows cols = board <- Board.create_clear rows cols
     method random_board rows cols = board <- Board.create_random rows cols
   end

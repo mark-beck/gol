@@ -10,10 +10,3 @@ let is_overlapping cell vec =
   && point_x < cell.x + cell.width
   && point_y >= cell.y
   && point_y < cell.y + cell.width
-
-let draw cell =
-  let open Raylib in
-  let color =
-    match cell.state with 0 -> Color.gray | 1 -> Color.black | _ -> Color.red
-  in
-  draw_rectangle cell.x cell.y cell.width cell.width color
