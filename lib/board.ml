@@ -24,15 +24,14 @@ let count_nbs_2 cells n x y =
   let neighbors =
     [ (-1, -1); (-1, 0); (-1, 1); (0, -1); (0, 1); (1, -1); (1, 0); (1, 1) ]
   in
-  List.rev_map
+  List.iter
     (fun (i, j) ->
       let nx = x + i in
       let ny = y + j in
       match Helpers.get_2d (nx, ny) cells with
-      | Some v -> nb_array.(v) <- nb_array.(v) + 1
+      | Some v -> Array.unsafe_set nb_array v ((Array.unsafe_get nb_array v) + 1)  (* this is safe as long as the ruleset for the board never changes *)
       | _ -> ())
-    neighbors
-  |> ignore;
+    neighbors;
   nb_array
 
 let get = get_2d

@@ -18,6 +18,7 @@ let get_2d xy arrays =
     Some (Array.get row y)
   with Invalid_argument _ -> None
 
+
 let map2d f arrays =
   arrays |> Array.map @@ fun row -> row |> Array.map @@ fun e -> f e
 

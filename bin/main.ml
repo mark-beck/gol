@@ -40,13 +40,13 @@ let init_game_objects () =
     to_baseObj
     @@ new Gui_control.rowSpinner
          (Rectangle.create 50.0 100. 100.0 20.0)
-         "rows" ~min:0 ~max:200
+         "rows" ~min:0 ~max:300
   in
   let col_spinner =
     to_baseObj
     @@ new Gui_control.colSpinner
          (Rectangle.create 225.0 100. 100.0 20.0)
-         "cols" ~min:0 ~max:200
+         "cols" ~min:0 ~max:300
   in
 
   let selector =
