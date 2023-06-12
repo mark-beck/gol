@@ -19,6 +19,22 @@ let count_nbs cells state x y =
   |> Seq.map (function Some v when v = state -> 1 | _ -> 0)
   |> Seq.fold_left ( + ) 0
 
+let count_nbs_2 cells n x y =
+  let nb_array = Array.make n 0 in
+  let neighbors =
+    [ (-1, -1); (-1, 0); (-1, 1); (0, -1); (0, 1); (1, -1); (1, 0); (1, 1) ]
+  in
+  List.rev_map
+    (fun (i, j) ->
+      let nx = x + i in
+      let ny = y + j in
+      match Helpers.get_2d (nx, ny) cells with
+      | Some v -> nb_array.(v) <- nb_array.(v) + 1
+      | _ -> ())
+    neighbors
+  |> ignore;
+  nb_array
+
 let get = get_2d
 let map = map2d
 

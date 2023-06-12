@@ -21,6 +21,8 @@ val count_nbs : t -> int -> int -> int -> int
 (** [count_nbs b r c s] is the number of neighbors of cell [(r,c)] in
     board [b] that are in state [s]. *)
 
+val count_nbs_2 : t -> int -> int -> int -> int array
+
 val get : int * int -> t -> int option
 (** [get (r,c) b] is the state of cell [(r,c)] in board [b], or [None]
     if [(r,c)] is not a valid cell in [b]. *)
